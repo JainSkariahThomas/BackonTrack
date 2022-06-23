@@ -90,3 +90,57 @@ sudo apachectl -t
 sleep 5;
 sudo systemctl reload apache2
 echo "<?php phpinfo(); ?>" | sudo tee /var/www/html/info.php
+echo
+echo
+echo "======================================="
+sudo mkdir -v /usr/share/nginx/jain.practiceandlearn.in /usr/share/nginx/vesion.practiceandlearn.in
+echo "<h1 style='color: green;'>Example.com</h1>" | sudo tee /usr/share/nginx/jain.practiceandlearn.in/index.html
+echo "<h1 style='color: red;'>Sample.org</h1>" | sudo tee /usr/share/nginx/vesion.practiceandlearn.in/index.html
+echo "<?php phpinfo(); ?>" | sudo tee /usr/share/nginx/jain.practiceandlearn.in/info.php
+echo "<?php phpinfo(); ?>" | sudo tee /usr/share/nginx/version.practiceandlearn.in/info.php
+touch /etc/nginx/sites-available/jain.practiceandlearn.in
+cat <<EOF >/etc/nginx/sites-available/jain.practiceandlearn.in
+server {
+    listen 80 default_server;
+
+    root /usr/share/nginx/jain.practiceandlearn.in;
+    index index.php index.html index.htm;
+
+    server_name jain.practiceandlearn.in www.jain.practiceandlearn.in;
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:$phppath;
+        include snippets/fastcgi-php.conf;
+    }
+}
+EOF
+touch /etc/nginx/sites-available/version.practiceandlearn.in
+cat <<EOF >/etc/nginx/sites-available/version.practiceandlearn.in
+server {
+    root /usr/share/nginx/version.practiceandlearn.in;
+    index index.php index.html index.htm;
+
+    server_name version.practiceandlearn.in www.version.practiceandlearn.in;
+    location / {
+        try_files $uri $uri/ /index.php;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:$phppath;
+        include snippets/fastcgi-php.conf;
+    }
+}
+EOF
+sudo ln -s /etc/nginx/sites-available/jain.practiceandlearn.in /etc/nginx/sites-enabled/jain.practiceandlearn.in
+sudo ln -s /etc/nginx/sites-available/version.practiceandlearn.in /etc/nginx/sites-enabled/version.practiceandlearn.in
+sudo nginx -t
+if [ $? -eq 0 ]; then
+   echo OK
+else
+   echo Installation FAILED
+   break
+fi
+sudo systemctl reload nginx
