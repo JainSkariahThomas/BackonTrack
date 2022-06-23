@@ -144,3 +144,22 @@ else
    break
 fi
 sudo systemctl reload nginx
+echo
+echo
+cat <<EOF >/etc/nginx/sites-available/apache
+server {
+    listen 80;
+    server_name jain.practiceandlearn.in www.jain.practiceandlearn.in version.practiceandlearn.in www.version.practiceandlearn.in;
+
+    location / {
+        proxy_pass http://$IP:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+EOF
+sudo ln -s /etc/nginx/sites-available/apache /etc/nginx/sites-enabled/apache
+sudo nginx -t
+sudo systemctl reload nginx
